@@ -1,12 +1,18 @@
 var _ = require('lodash');
 var GulpUtil = require('gulp-util');
-var fs = require('fs');
 var exec = require('sync-exec');
 var xlsx = require('xlsx');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var getDirName = require('path').dirname;
+var filendir = require('filendir');
 
 var Converter = function() {
     this.allowedFiles = ['xlsx', 'xls', 'csv'];
+    this.outputdir = './output/';
+    this.fileSuffix = '-emails.csv'
     this.directory = null;
+    this.totalFiles = 0;
 };
 
 Converter.prototype.init = function() {
@@ -20,24 +26,30 @@ Converter.prototype.init = function() {
     }
 
     if (!this.outputdir) {
-        this.outputdir = './output';
+        this.outputdir = './output/';
         console.log('Output directory set to ./output.');
     }
 
     var files = this.readDirectory(this.directory);
 
-    //_.each(files, this.convertFiletoCsv.bind(this));
-
-    this.convertFiletoCsv(files[300]);
+    this.totalFiles = files.length;
 
     console.log(files.length + ' files to be converted to csv.');
+
+    _.each(files, this.convertFiletoCsv.bind(this));
 };
 
-Converter.prototype.convertFiletoCsv = function(file) {
+Converter.prototype.convertFiletoCsv = function(file, index) {
+
+    console.log('Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.');
+
     var path = this.directory + file;
     var workbook = xlsx.readFile(path);
+    var wfile = this.outputdir + file + this.fileSuffix;
+    var fdir = wfile.replace(/ /g, '-');
+
     var em = this.extractEmailsFromString(JSON.stringify(workbook));
-    fs.writeFileSync('output.csv', em.join('\n'));
+    filendir.writeFileSync(wfile.replace(/ /g, '-'), em.join('\n'));
 };
 
 Converter.prototype.extractEmailsFromString = function(text) {
