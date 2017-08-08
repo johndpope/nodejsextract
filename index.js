@@ -47,24 +47,32 @@ Converter.prototype.init = function() {
 
 Converter.prototype.convertFiletoCsv = function(file, index) {
 
-    console.log(this.getDateTimeSince(this.startTime) + ' ::: Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.');
     var em = [];
+    var workbook = null;
     var path = this.directory + file;
     var wfile = this.outputdir + file + this.fileSuffix;
     var fdir = wfile.replace(/ /g, '-');
     var filename = fdir.replace(/^.*[\\\/]/, '')
 
+    console.log(this.getDateTimeSince(this.startTime) + ' ::: Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.' + ' ::: ' + filename);
+
     if (fileExists.sync(wfile.replace(/ /g, '-'))) {
-        console.log(this.getDateTimeSince(this.startTime) + ' ::: File already exists ' + (index + 1));
+        console.log(this.getDateTimeSince(this.startTime) + ' ::: File already exists ' + (index + 1) + ' ::: ' + filename);
         return;
     }
 
-    var workbook = xlsx.readFile(path);
+    try {
+        workbook = xlsx.readFile(path);
+    } catch (e) {
+        console.log(this.getDateTimeSince(this.startTime) + ' ::: File is not supported ' + (index + 1) + ' ::: ' + filename);
+        return;
+    }
+
     if (workbook) {
         try {
             em = this.extractEmailsFromString(JSON.stringify(workbook));
         } catch (e) {
-            console.log(this.getDateTimeSince(this.startTime) + ' ::: Error ' + (index + 1));
+            console.log(this.getDateTimeSince(this.startTime) + ' ::: Error ' + (index + 1) + ' ::: ' + filename);
             return;
         }
     }
