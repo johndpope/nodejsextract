@@ -60,7 +60,12 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
 
     var workbook = xlsx.readFile(path);
     if (workbook) {
-        em = this.extractEmailsFromString(JSON.stringify(workbook));
+        try {
+            em = this.extractEmailsFromString(JSON.stringify(workbook));
+        } catch (e) {
+            console.log(this.getDateTimeSince(this.startTime) + ' ::: Error ' + (index + 1));
+            return;
+        }
     }
     console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 
