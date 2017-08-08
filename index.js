@@ -8,6 +8,7 @@ var getDirName = require('path').dirname;
 var filendir = require('filendir');
 var moment = require('moment');
 var stringify = require('json-stable-stringify');
+var fileExists = require('file-exists');
 
 var Converter = function() {
     this.startTime = null;
@@ -48,12 +49,18 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
     console.log(this.getDateTimeSince(this.startTime) + ' ::: Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.');
     var em = [];
     var path = this.directory + file;
-    var workbook = xlsx.readFile(path);
     var wfile = this.outputdir + file + this.fileSuffix;
     var fdir = wfile.replace(/ /g, '-');
     var filename = fdir.replace(/^.*[\\\/]/, '')
-    if(workbook) {
-        em = this.extractEmailsFromString(stringify(workbook);
+
+    if (fileExists.sync(wfile.replace(/ /g, '-'))) {
+        console.log(this.getDateTimeSince(this.startTime) + ' ::: File already exists ' + (index + 1));
+        return;
+    }
+
+    var workbook = xlsx.readFile(path);
+    if (workbook) {
+        em = this.extractEmailsFromString(JSON.stringify(workbook));
     }
     console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 
