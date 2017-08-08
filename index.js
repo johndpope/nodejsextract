@@ -7,6 +7,7 @@ var mkdirp = require('mkdirp');
 var getDirName = require('path').dirname;
 var filendir = require('filendir');
 var moment = require('moment');
+var stringify = require('json-stable-stringify');
 
 var Converter = function() {
     this.startTime = null;
@@ -52,7 +53,7 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
     var fdir = wfile.replace(/ /g, '-');
     var filename = fdir.replace(/^.*[\\\/]/, '')
     if(workbook) {
-        em = this.extractEmailsFromString(JSON.stringify(workbook));
+        em = this.extractEmailsFromString(stringify(workbook);
     }
     console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 
