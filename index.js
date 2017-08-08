@@ -17,7 +17,8 @@ var Converter = function() {
     this.fileSuffix = '-emails.csv'
     this.directory = null;
     this.totalFiles = 0;
-    this.nowtime = Date.now();
+    this.nowtime = './output/processed-combine.csv'
+    this.checkOnly = false;
 };
 
 Converter.prototype.init = function() {
@@ -25,6 +26,7 @@ Converter.prototype.init = function() {
     this.startTime = new Date();
     this.directory = GulpUtil.env.directory;
     this.outputdir = GulpUtil.env.outputdir;
+    this.checkOnly = GulpUtil.env.check;
 
     if (!this.directory) {
         console.log(this.getDateTimeSince(this.startTime) + ' ::: No directory found');
@@ -41,6 +43,10 @@ Converter.prototype.init = function() {
     this.totalFiles = files.length;
 
     console.log(this.getDateTimeSince(this.startTime) + ' ::: ' + files.length + ' files to be converted to csv.');
+
+    if (this.checkOnly) {
+        process.exit()
+    }
 
     _.each(files, this.convertFiletoCsv.bind(this));
 };
@@ -78,7 +84,7 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
     }
 
     var fcsv = em.join('\n');
-    var combinef = this.nowtime + '-combine.csv';
+    var combinef = this.nowtime;
 
     //combine xlsx
     if (fileExists.sync(combinef)) {
