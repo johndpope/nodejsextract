@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var GulpUtil = require('gulp-util');
-var exec = require('sync-exec');
+var exec = require('child_process').exec;
 var xlsx = require('xlsx');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
@@ -67,9 +67,26 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
             return;
         }
     }
-    console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 
-    filendir.writeFileSync(wfile.replace(/ /g, '-'), em.join('\n'));
+    var fcsv = em.join('\n');
+    var combinef = Date.now() + '-combine.csv';
+
+    //combine xlsx
+    if (fileExists.sync(combinef)) {
+        fs.appendFileSync(combinef, '\n' + fcsv)
+    } else {
+        filendir.writeFileSync(combinef, fcsv);
+    }
+
+    exec('sort ' + combinef + ' | uniq -u',
+        function(error, stdout, stderr) {
+            fs.writeFileSync(combinef, stdout);
+        });
+
+    //write per xlsx
+    filendir.writeFileSync(wfile.replace(/ /g, '-'), fcsv);
+
+    console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 };
 
 Converter.prototype.extractEmailsFromString = function(text) {
