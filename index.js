@@ -6,8 +6,10 @@ var fs = require('fs');
 var mkdirp = require('mkdirp');
 var getDirName = require('path').dirname;
 var filendir = require('filendir');
+var moment = require('moment');
 
 var Converter = function() {
+    this.startTime = null;
     this.allowedFiles = ['xlsx', 'xls', 'csv'];
     this.outputdir = './output/';
     this.fileSuffix = '-emails.csv'
@@ -17,38 +19,43 @@ var Converter = function() {
 
 Converter.prototype.init = function() {
 
+    this.startTime = new Date();
     this.directory = GulpUtil.env.directory;
     this.outputdir = GulpUtil.env.outputdir;
 
     if (!this.directory) {
-        console.log('No directory found');
+        console.log(this.getDateTimeSince(this.startTime) + ' ::: No directory found');
         process.exit()
     }
 
     if (!this.outputdir) {
         this.outputdir = './output/';
-        console.log('Output directory set to ./output.');
+        console.log(this.getDateTimeSince(this.startTime) + ' ::: Output directory set to ./output.');
     }
 
     var files = this.readDirectory(this.directory);
 
     this.totalFiles = files.length;
 
-    console.log(files.length + ' files to be converted to csv.');
+    console.log(this.getDateTimeSince(this.startTime) + ' ::: ' + files.length + ' files to be converted to csv.');
 
     _.each(files, this.convertFiletoCsv.bind(this));
 };
 
 Converter.prototype.convertFiletoCsv = function(file, index) {
 
-    console.log('Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.');
-
+    console.log(this.getDateTimeSince(this.startTime) + ' ::: Processing file ' + (index + 1) + ' out of ' + this.totalFiles + ' files.');
+    var em = [];
     var path = this.directory + file;
     var workbook = xlsx.readFile(path);
     var wfile = this.outputdir + file + this.fileSuffix;
     var fdir = wfile.replace(/ /g, '-');
+    var filename = fdir.replace(/^.*[\\\/]/, '')
+    if(workbook) {
+        em = this.extractEmailsFromString(JSON.stringify(workbook));
+    }
+    console.log(this.getDateTimeSince(this.startTime) + ' ::: File ' + (index + 1) + ' - Unique Emails Found: ' + em.length + ' ::: ' + filename);
 
-    var em = this.extractEmailsFromString(JSON.stringify(workbook));
     filendir.writeFileSync(wfile.replace(/ /g, '-'), em.join('\n'));
 };
 
@@ -91,6 +98,10 @@ Converter.prototype.isAllowed = function(name) {
     }
     return true;
 };
+
+Converter.prototype.getDateTimeSince = function(target) { // target should be a Date object
+    return moment(target).from(new Date(), true);
+}
 
 var app = new Converter();
 app.init();
