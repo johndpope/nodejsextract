@@ -17,6 +17,7 @@ var Converter = function() {
     this.fileSuffix = '-emails.csv'
     this.directory = null;
     this.totalFiles = 0;
+    this.nowtime = Date.now();
 };
 
 Converter.prototype.init = function() {
@@ -69,7 +70,7 @@ Converter.prototype.convertFiletoCsv = function(file, index) {
     }
 
     var fcsv = em.join('\n');
-    var combinef = Date.now() + '-combine.csv';
+    var combinef = this.nowtime + '-combine.csv';
 
     //combine xlsx
     if (fileExists.sync(combinef)) {
