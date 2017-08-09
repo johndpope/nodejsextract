@@ -54,7 +54,8 @@ Converter.prototype.init = function() {
 
 Converter.prototype.convertFiletoCsv = function(file, index) {
 
-    sleep.sleep(1);
+    console.log('Sleep 3');
+    sleep.sleep(3);
 
     var em = [];
     var workbook = null;
