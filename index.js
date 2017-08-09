@@ -9,6 +9,7 @@ var filendir = require('filendir');
 var moment = require('moment');
 var stringify = require('json-stable-stringify');
 var fileExists = require('file-exists');
+var sleep = require('sleep');
 
 var Converter = function() {
     this.startTime = null;
@@ -52,6 +53,8 @@ Converter.prototype.init = function() {
 };
 
 Converter.prototype.convertFiletoCsv = function(file, index) {
+
+    sleep.sleep(1);
 
     var em = [];
     var workbook = null;
